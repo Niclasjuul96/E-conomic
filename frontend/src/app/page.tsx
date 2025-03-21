@@ -1,8 +1,39 @@
-// src/app/page.tsx
+"use client";
+
+import { useState } from "react";
+import CsvUploader from "@/components/CsvUploader";
+import BudgetTable from "@/components/BudgetTable";
+
 export default function Home() {
+  // Define a strict type for transactions
+  type Transaction = {
+    category: string;
+    [key: string]: string | number; // Allow month values dynamically
+  };
+
+  const [incomeData, setIncomeData] = useState<Transaction[]>([]);
+  const [expenseData, setExpenseData] = useState<Transaction[]>([]);
+  const [disposableIncomeData, setDisposableIncomeData] = useState<Transaction[]>([]);
+
   return (
-    <main>
-      <h1>Welcome to My Next.js App</h1>
+    <main className="flex flex-col items-start justify-center min-h-screen p-6">
+      <h1 className="text-3xl font-bold mb-4">E-conomic</h1>
+
+      {/* CSV Upload Component */}
+      <CsvUploader
+        onDataParsed={(parsedData) => {
+          setIncomeData(parsedData.income as Transaction[]);
+          setExpenseData(parsedData.expenses as Transaction[]);
+          setDisposableIncomeData(parsedData.disposableIncome as Transaction[]);
+        }}
+      />
+
+      {/* Budget Table Component */}
+      <BudgetTable
+        incomeData={incomeData}
+        expenseData={expenseData}
+        disposableIncomeData={disposableIncomeData}
+      />
     </main>
   );
 }
