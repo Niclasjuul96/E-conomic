@@ -67,7 +67,6 @@ export default function CsvUploader({ onDataParsed }: CsvUploaderProps) {
         existingEntry[month] = (existingEntry[month] || 0) + amount;
       }
 
-      // ✅ Calculate Total and Average for each entry
       const months = [
         "January", "February", "March", "April", "May", "June",
         "July", "August", "September", "October", "November", "December"
@@ -87,7 +86,6 @@ export default function CsvUploader({ onDataParsed }: CsvUploaderProps) {
       addTotalAndAverage(income);
       addTotalAndAverage(expenses);
 
-      // ✅ Disposable Income
       const disposableIncome: Record<string, any> = { category: "Disposable Income" };
       months.forEach((month) => {
         const totalIncome = income.reduce((sum, row) => sum + (row[month] || 0), 0);

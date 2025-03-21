@@ -5,10 +5,10 @@ import CsvUploader from "@/components/CsvUploader";
 import BudgetTable from "@/components/BudgetTable";
 
 export default function Home() {
-  // Define a strict type for transactions
+
   type Transaction = {
     category: string;
-    [key: string]: string | number; // Allow month values dynamically
+    [key: string]: string | number; 
   };
 
   const [incomeData, setIncomeData] = useState<Transaction[]>([]);
@@ -19,7 +19,7 @@ export default function Home() {
     <main className="flex flex-col items-start justify-center min-h-screen p-6">
       <h1 className="text-3xl font-bold mb-4">E-conomic</h1>
 
-      {/* CSV Upload Component */}
+
       <CsvUploader
         onDataParsed={(parsedData) => {
           setIncomeData(parsedData.income as Transaction[]);
@@ -28,7 +28,6 @@ export default function Home() {
         }}
       />
 
-      {/* Budget Table Component */}
       <BudgetTable
         incomeData={incomeData}
         expenseData={expenseData}
