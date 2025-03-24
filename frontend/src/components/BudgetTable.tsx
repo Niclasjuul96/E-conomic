@@ -1,34 +1,14 @@
 "use client";
 
 import React from "react";
-
-interface BudgetRow {
-  category: string;
-  [key: string]: string | number | undefined;
-}
+import { BudgetRow } from "@/types/types";
+import { monthColumns } from "@/constants/months";
 
 interface BudgetTableProps {
   incomeData: BudgetRow[];
   expenseData: BudgetRow[];
   disposableIncomeData: BudgetRow[];
 }
-
-const monthColumns = [
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
-  "Total",
-  "Average",
-];
 
 const BudgetTable: React.FC<BudgetTableProps> = ({
   incomeData,
@@ -54,16 +34,12 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
             {data.length > 0 ? (
               data.map((row, index) => (
                 <tr key={index} className="hover:bg-gray-100">
-                  <td className="border border-gray-300 px-4 py-2">
-                    {row.category}
-                  </td>
+                  <td className="border border-gray-300 px-4 py-2">{row.category}</td>
                   {monthColumns.map((month) => {
                     const value = row[month];
                     return (
                       <td key={month} className="border border-gray-300 px-4 py-2">
-                        {typeof value === "number"
-                          ? value.toFixed(2)
-                          : value || "-"}
+                        {typeof value === "number" ? value.toFixed(2) : value || "-"}
                       </td>
                     );
                   })}
