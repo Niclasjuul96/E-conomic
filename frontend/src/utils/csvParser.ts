@@ -1,5 +1,3 @@
-// /utils/csvParser.ts
-
 import { BudgetEntry, ParsedCsvData } from "@/types/types";
 
 const months = [
