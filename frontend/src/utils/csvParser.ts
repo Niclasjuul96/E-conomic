@@ -72,7 +72,6 @@ export const parseCsvContent = (text: string): ParsedCsvData => {
     });
     addTotals([disposable]);
 
-    // ✅ Add Total Income
     const totalIncome: BudgetEntry = { category: "Total Income" };
     months.forEach((month) => {
     totalIncome[month] = income.reduce((sum, row) => sum + Number(row[month] || 0), 0);
@@ -80,7 +79,6 @@ export const parseCsvContent = (text: string): ParsedCsvData => {
     addTotals([totalIncome]);
     income.push(totalIncome);
 
-    // ✅ Add Total Expenses
     const totalExpenses: BudgetEntry = { category: "Total Expenses" };
     months.forEach((month) => {
     totalExpenses[month] = expenses.reduce((sum, row) => sum + Number(row[month] || 0), 0);
