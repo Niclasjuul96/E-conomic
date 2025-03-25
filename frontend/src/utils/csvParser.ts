@@ -37,39 +37,65 @@ export const parseCsvContent = (text: string): ParsedCsvData => {
         date: dateStr,
         title,
         amount,
-        category: hovedkategori,
+        category: amount >= 0 ? kategori : hovedkategori,
         month,
       });
       
-
-      const targetArray = amount >= 0 ? income : expenses;
-      let existing = targetArray.find((i) => i.category === hovedkategori);
-      if (!existing) {
-        existing = { category: hovedkategori };
-        targetArray.push(existing);
+         
+      // Use subcategory for income, hovedkategori for expenses
+      if (amount >= 0) {
+        let existing = income.find((i) => i.category === kategori);
+        if (!existing) {
+          existing = { category: kategori };
+          income.push(existing);
+        }
+        existing[month] = Number(existing[month] || 0) + amount;
+      } else {
+        let existing = expenses.find((i) => i.category === hovedkategori);
+        if (!existing) {
+          existing = { category: hovedkategori };
+          expenses.push(existing);
+        }
+        existing[month] = Number(existing[month] || 0) + amount;
       }
-      existing[month] = Number(existing[month] || 0) + amount;    
+      
   }
 
-  addTotals(income);
-  addTotals(expenses);
+    addTotals(income);
+    addTotals(expenses);
 
-
-  const disposable: BudgetEntry = { category: "Disposable Income" };
-  months.forEach((month) => {
+    const disposable: BudgetEntry = { category: "Disposable Income" };
+    months.forEach((month) => {
     const totalIncome = income.reduce((sum, row) => sum + Number(row[month] || 0), 0);
     const totalExpenses = expenses.reduce((sum, row) => sum + Number(row[month] || 0), 0);
     disposable[month] = totalIncome + totalExpenses;
-  });
-  addTotals([disposable]);
+    });
+    addTotals([disposable]);
 
-  return {
+    // ✅ Add Total Income
+    const totalIncome: BudgetEntry = { category: "Total Income" };
+    months.forEach((month) => {
+    totalIncome[month] = income.reduce((sum, row) => sum + Number(row[month] || 0), 0);
+    });
+    addTotals([totalIncome]);
+    income.push(totalIncome);
+
+    // ✅ Add Total Expenses
+    const totalExpenses: BudgetEntry = { category: "Total Expenses" };
+    months.forEach((month) => {
+    totalExpenses[month] = expenses.reduce((sum, row) => sum + Number(row[month] || 0), 0);
+    });
+    addTotals([totalExpenses]);
+    expenses.push(totalExpenses);
+
+    return {
     income,
     expenses,
     disposableIncome: [disposable],
     transactions,
-  };
-};
+    };
+
+}
 
   
 
