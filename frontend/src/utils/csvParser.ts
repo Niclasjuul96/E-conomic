@@ -97,8 +97,6 @@ export const parseCsvContent = (text: string): ParsedCsvData => {
 
 }
 
-  
-
 const parseAmount = (raw: string): number => {
   if (!raw) return 0;
   return parseFloat(raw.replace(/\./g, "").replace(",", ".")) || 0;
