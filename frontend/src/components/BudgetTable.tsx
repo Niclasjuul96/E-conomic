@@ -11,7 +11,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
   onCellClick,
 }) => {
   const [columnWidths, setColumnWidths] = useState<number[]>([]);
-  const allHeaderRefs = useRef<(HTMLTableHeaderCellElement | null)[][]>([]);
+  const allHeaderRefs = useRef<(HTMLTableCellElement | null)[][]>([]);
 
   useEffect(() => {
     const columnCount = monthColumns.length + 1;
@@ -33,7 +33,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
     data: BudgetRow[],
     tableIndex: number
   ) => {
-    const headerRefs: (HTMLTableHeaderCellElement | null)[] = [];
+    const headerRefs: (HTMLTableCellElement | null)[] = [];
     allHeaderRefs.current[tableIndex] = headerRefs;
 
     return (
