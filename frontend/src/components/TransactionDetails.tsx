@@ -76,7 +76,7 @@ const TransactionDetails: React.FC<Props> = ({
                       t.amount < 0 ? "text-red-600" : "text-green-600"
                     }`}
                   >
-                    {t.amount.toFixed(2)}
+                    {t.amount.toLocaleString("da-DK", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </td>
                   <td className="border border-gray-700 px-4 py-2">
                     {t.category}

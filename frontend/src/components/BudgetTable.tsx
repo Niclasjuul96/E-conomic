@@ -111,7 +111,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                                 : "text-white"
                             }`}
                           >
-                            {isNumber ? value.toFixed(2) : value || "-"}
+                            {isNumber ? value.toLocaleString("da-DK", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : value || "-"}
                           </td>
                         );
                       })}
