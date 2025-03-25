@@ -1,4 +1,4 @@
-import { BudgetEntry, ParsedCsvData } from "@/types/types";
+import { BudgetEntry, ParsedCsvData, TransactionDetail } from "@/types/types";
 
 const months = [
   "January", "February", "March", "April", "May", "June",
@@ -7,13 +7,14 @@ const months = [
 
 export const parseCsvContent = (text: string): ParsedCsvData => {
   const rows = text.split("\n").map((row) => row.split(";"));
-  if (rows.length < 2) return { income: [], expenses: [], disposableIncome: [] };
+  if (rows.length < 2) return { income: [], expenses: [], disposableIncome: [], transactions: [] };
 
   const headers = rows[0].map((h) => h.trim());
   const dataRows = rows.slice(1);
 
   const income: BudgetEntry[] = [];
   const expenses: BudgetEntry[] = [];
+  const transactions: TransactionDetail[] = [];
 
   for (const row of dataRows) {
     if (row.length < headers.length) continue;
@@ -23,50 +24,54 @@ export const parseCsvContent = (text: string): ParsedCsvData => {
       entry[header] = row[index]?.trim();
     });
 
-    const category = entry["Hovedkategori"] || "Unknown";
-    const amount = parseAmount(entry["Beløb"]);
-    if (isNaN(amount)) continue;
+    const title = row[1]?.trim() || "No title";
+    const amount = parseAmount(row[2]);
+    const dateStr = row[0]?.trim() || "";
+    const date = new Date(dateStr.split(".").reverse().join("-"));
+    const month = date.toLocaleString("en-US", { month: "long" });
+    
+    const hovedkategori = row[7]?.trim() || "Unknown";
+    const kategori = row[8]?.trim() || "Unknown";
+    
+    transactions.push({
+        date: dateStr,
+        title,
+        amount,
+        category: hovedkategori,
+        month,
+      });
+      
 
-    const transactionDate = new Date((entry["Dato"] || "").split(".").reverse().join("-"));
-    const month = transactionDate.toLocaleString("en-US", { month: "long" });
-
-    const targetArray = amount >= 0 ? income : expenses;
-    let existing = targetArray.find((i) => i.category === category);
-    if (!existing) {
-      existing = { category };
-      targetArray.push(existing);
-    }
-    existing[month] = (existing[month] || 0) as number + amount;
+      const targetArray = amount >= 0 ? income : expenses;
+      let existing = targetArray.find((i) => i.category === hovedkategori);
+      if (!existing) {
+        existing = { category: hovedkategori };
+        targetArray.push(existing);
+      }
+      existing[month] = Number(existing[month] || 0) + amount;    
   }
 
   addTotals(income);
   addTotals(expenses);
 
+
   const disposable: BudgetEntry = { category: "Disposable Income" };
-  months.forEach((m) => {
-    const incomeSum = income.reduce((s, e) => s + Number(e[m] || 0), 0);
-    const expenseSum = expenses.reduce((s, e) => s + Number(e[m] || 0), 0);    
-    disposable[m] = incomeSum + expenseSum;
+  months.forEach((month) => {
+    const totalIncome = income.reduce((sum, row) => sum + Number(row[month] || 0), 0);
+    const totalExpenses = expenses.reduce((sum, row) => sum + Number(row[month] || 0), 0);
+    disposable[month] = totalIncome + totalExpenses;
   });
   addTotals([disposable]);
-
-  const incomeTotal: BudgetEntry = { category: "Total Income" };
-  const expenseTotal: BudgetEntry = { category: "Total Expenses" };
-  months.forEach((m) => {
-    incomeTotal[m] = income.reduce((sum, r) => sum + Number(r[m] || 0), 0);
-    expenseTotal[m] = expenses.reduce((sum, r) => sum + Number(r[m] || 0), 0);    
-  });
-  addTotals([incomeTotal]);
-  addTotals([expenseTotal]);
-  income.push(incomeTotal);
-  expenses.push(expenseTotal);
 
   return {
     income,
     expenses,
     disposableIncome: [disposable],
+    transactions,
   };
 };
+
+  
 
 const parseAmount = (raw: string): number => {
   if (!raw) return 0;

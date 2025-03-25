@@ -8,9 +8,10 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
   incomeData,
   expenseData,
   disposableIncomeData,
+  onCellClick,
 }) => {
   const [columnWidths, setColumnWidths] = useState<number[]>([]);
-  const allHeaderRefs = useRef<(HTMLTableHeaderCellElement | null)[][]>([]); // 2D array: one per table
+  const allHeaderRefs = useRef<(HTMLTableHeaderCellElement | null)[][]>([]);
 
   useEffect(() => {
     const columnCount = monthColumns.length + 1;
@@ -37,10 +38,10 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
 
     return (
       <div key={title} className="mb-10 w-full overflow-x-auto">
-        <h2 className="text-xl font-bold mb-2">{title}</h2>
-        <table className="min-w-[1000px] border-collapse border border-gray-400 text-left">
+        <h2 className="text-xl font-bold mb-2 text-white">{title}</h2>
+        <table className="min-w-[1000px] border-collapse border border-gray-700 text-left bg-black text-white">
           <thead>
-            <tr className="bg-gray-100 text-black">
+            <tr className="bg-gray-900 text-white">
               <th
                 ref={(el) => {
                   headerRefs[0] = el;
@@ -49,7 +50,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                   minWidth: columnWidths[0] ? `${columnWidths[0]}px` : undefined,
                   maxWidth: columnWidths[0] ? `${columnWidths[0]}px` : undefined,
                 }}
-                className="border border-gray-300 px-4 py-2 font-bold"
+                className="border border-gray-700 px-4 py-2 font-bold"
               >
                 Category
               </th>
@@ -60,14 +61,10 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                     headerRefs[i + 1] = el;
                   }}
                   style={{
-                    minWidth: columnWidths[i + 1]
-                      ? `${columnWidths[i + 1]}px`
-                      : undefined,
-                    maxWidth: columnWidths[i + 1]
-                      ? `${columnWidths[i + 1]}px`
-                      : undefined,
+                    minWidth: columnWidths[i + 1] ? `${columnWidths[i + 1]}px` : undefined,
+                    maxWidth: columnWidths[i + 1] ? `${columnWidths[i + 1]}px` : undefined,
                   }}
-                  className="border border-gray-300 px-4 py-2 font-bold"
+                  className="border border-gray-700 px-4 py-2 font-bold"
                 >
                   {month}
                 </th>
@@ -77,8 +74,6 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
           <tbody>
             {data.length > 0 ? (
               data.map((row, index) => {
-                const isNumber = (value: any): value is number =>
-                  typeof value === "number";
                 const isTotalRow =
                   row.category?.toLowerCase().includes("total") ||
                   row.category === "Disposable Income";
@@ -90,50 +85,51 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                     </tr>
                   ) : null;
 
-                  return (
-                    <React.Fragment key={index}>
-                      {spacer}
-                      <tr className="hover:bg-gray-800 group">
-                        <td className="border border-gray-300 px-4 py-2 font-medium text-white group-hover:text-white">
-                          {row.category}
-                        </td>
-                        {monthColumns.map((month) => {
-                          const value = row[month];
-                          const isNumber = typeof value === "number";
-                          const isNegative = isNumber && value < 0;
-                  
-                          return (
-                            <td
-                              key={month}
-                              className={`border border-gray-300 px-4 py-2 text-sm ${
-                                isNegative
-                                  ? "text-red-600"
-                                  : isNumber
-                                  ? "text-green-600"
-                                  : ""
-                              }`}
-                            >
-                              {isNumber ? value.toFixed(2) : value || "-"}
-                            </td>
-                          );
-                        })}
-                      </tr>
-                    </React.Fragment>
-                  );
-                  
+                return (
+                  <React.Fragment key={index}>
+                    {spacer}
+                    <tr className="hover:bg-gray-800 transition-colors duration-200">
+                      <td className="border border-gray-700 px-4 py-2 font-medium text-white">
+                        {row.category}
+                      </td>
+                      {monthColumns.map((month) => {
+                        const value = row[month];
+                        const isNumber = typeof value === "number";
+                        const isNegative = isNumber && value < 0;
+
+                        return (
+                          <td
+                            key={month}
+                            onClick={() =>
+                              isNumber && onCellClick?.(row.category, month)
+                            }
+                            className={`border border-gray-700 px-4 py-2 text-sm cursor-pointer ${
+                              isNegative
+                                ? "text-red-600"
+                                : isNumber
+                                ? "text-green-600"
+                                : "text-white"
+                            }`}
+                          >
+                            {isNumber ? value.toFixed(2) : value || "-"}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  </React.Fragment>
+                );
               })
             ) : (
               <tr>
                 <td
                   colSpan={monthColumns.length + 1}
-                  className="border px-4 py-2 text-center text-gray-500"
+                  className="border px-4 py-2 text-center text-gray-400"
                 >
                   No data available. Upload a CSV file.
                 </td>
               </tr>
             )}
           </tbody>
-
         </table>
       </div>
     );
@@ -141,7 +137,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
 
   return (
     <div className="mt-6 w-full max-w-full px-4">
-      <h2 className="text-3xl font-semibold mb-6">Budget Overview</h2>
+      <h2 className="text-3xl font-semibold mb-6 text-white">Budget Overview</h2>
       {renderTable("Income Transactions", incomeData, 0)}
       {renderTable("Expense Transactions", expenseData, 1)}
       {renderTable("Disposable Income", disposableIncomeData, 2)}
