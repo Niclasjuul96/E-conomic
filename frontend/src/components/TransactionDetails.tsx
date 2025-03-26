@@ -16,28 +16,55 @@ const TransactionDetails: React.FC<Props> = ({
 }) => {
   const { category, month } = selectedDetails;
   const ref = useRef<HTMLDivElement>(null);
+  const clickedInsideTable = useRef(false);
 
-    console.log("Selected Category:", category);
-    console.log("Selected Month:", month);
-    console.log("First 5 Transactions:", transactions.slice(0, 5));
-
-
-    const filtered = transactions.filter(
-        (t) =>
-            t.month === month &&
-            (t.category === category || category.includes(t.category) || t.category.includes(category))
-        );
-      
+  const filtered = transactions.filter((t) => {
+    if (category === "Total Income") {
+      if (month === "Total") return t.amount >= 0;
+      return t.amount >= 0 && t.month === month;
+    } else if (category === "Total Expenses") {
+      if (month === "Total") return t.amount < 0;
+      return t.amount < 0 && t.month === month;
+    } else if (month === "Total") {
+      return t.category === category;
+    } else {
+      return t.category === category && t.month === month;
+    }
+  });
+  
+  
 
   useEffect(() => {
+    const handleMouseDown = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+
+      // Check if a clickable cell was clicked
+      if (target.closest("td.cursor-pointer")) {
+        clickedInsideTable.current = true;
+      } else {
+        clickedInsideTable.current = false;
+      }
+    };
+
     const handleClickOutside = (event: MouseEvent) => {
+      if (clickedInsideTable.current) {
+        // Reset the flag and do nothing
+        clickedInsideTable.current = false;
+        return;
+      }
+
       if (ref.current && !ref.current.contains(event.target as Node)) {
         onClose();
       }
     };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () =>
-      document.removeEventListener("mousedown", handleClickOutside);
+
+    document.addEventListener("mousedown", handleMouseDown, true); // capture phase
+    document.addEventListener("mouseup", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleMouseDown, true);
+      document.removeEventListener("mouseup", handleClickOutside);
+    };
   }, [onClose]);
 
   return (
@@ -68,15 +95,16 @@ const TransactionDetails: React.FC<Props> = ({
                   className="hover:bg-gray-800 transition-colors duration-200"
                 >
                   <td className="border border-gray-700 px-4 py-2">{t.date}</td>
-                  <td className="border border-gray-700 px-4 py-2">
-                    {t.title}
-                  </td>
+                  <td className="border border-gray-700 px-4 py-2">{t.title}</td>
                   <td
                     className={`border border-gray-700 px-4 py-2 ${
                       t.amount < 0 ? "text-red-600" : "text-green-600"
                     }`}
                   >
-                    {t.amount.toLocaleString("da-DK", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    {t.amount.toLocaleString("da-DK", {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}
                   </td>
                   <td className="border border-gray-700 px-4 py-2">
                     {t.category}

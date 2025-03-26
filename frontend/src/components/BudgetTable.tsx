@@ -96,20 +96,27 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                         const value = row[month];
                         const isNumber = typeof value === "number";
                         const isNegative = isNumber && value < 0;
+                        const isAverageColumn = month === "Average";
+                        const isDisposableRow = row.category === "Disposable Income";
+                        const isClickable = isNumber && !isAverageColumn && !isDisposableRow;
 
                         return (
                           <td
                             key={month}
-                            onClick={() =>
-                              isNumber && onCellClick?.(row.category, month)
-                            }
-                            className={`border border-gray-700 px-4 py-2 text-sm cursor-pointer ${
+                            onClick={() => {
+                              if (isClickable) {
+                                onCellClick?.(row.category, month);
+                              }
+                            }}                            
+                            className={`border border-gray-700 px-4 py-2 text-sm ${
+                              isClickable ? "cursor-pointer" : ""
+                            } ${
                               isNegative
                                 ? "text-red-600"
                                 : isNumber
                                 ? "text-green-600"
                                 : "text-white"
-                            }`}
+                            }`}                            
                           >
                             {isNumber ? value.toLocaleString("da-DK", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : value || "-"}
                           </td>
