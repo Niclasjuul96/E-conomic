@@ -16,6 +16,7 @@ export interface ParsedCsvData {
     expenses: BudgetEntry[];
     disposableIncome: BudgetEntry[];
     transactions: TransactionDetail[];
+    years: number[];
 }
 
 export interface BudgetRow {

@@ -7,7 +7,7 @@ const months = [
 
 export const parseCsvContent = (text: string): ParsedCsvData => {
   const rows = text.split("\n").map((row) => row.split(";"));
-  if (rows.length < 2) return { income: [], expenses: [], disposableIncome: [], transactions: [] };
+  if (rows.length < 2) return { income: [], expenses: [], disposableIncome: [], transactions: [], years: [] };
 
   const headers = rows[0].map((h) => h.trim());
   const dataRows = rows.slice(1);
@@ -15,6 +15,7 @@ export const parseCsvContent = (text: string): ParsedCsvData => {
   const income: BudgetEntry[] = [];
   const expenses: BudgetEntry[] = [];
   const transactions: TransactionDetail[] = [];
+  const years = new Set<number>(); // ✅ collect distinct years
 
   for (const row of dataRows) {
     if (row.length < headers.length) continue;
@@ -32,7 +33,7 @@ export const parseCsvContent = (text: string): ParsedCsvData => {
 
     let monthDate = new Date(date); // Clone to avoid mutation
     const year = monthDate.getFullYear();
-    const monthIndex = monthDate.getMonth();
+    years.add(year); // ✅ add to year set
 
     // Shift income on the last working day of the month to the next month
     if (amount >= 0 && isLastWorkingDayOfMonth(date)) {
@@ -98,6 +99,7 @@ export const parseCsvContent = (text: string): ParsedCsvData => {
     expenses,
     disposableIncome: [disposable],
     transactions,
+    years: Array.from(years).sort(), // ✅ return sorted years
   };
 };
 
