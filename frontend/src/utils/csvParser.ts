@@ -28,72 +28,78 @@ export const parseCsvContent = (text: string): ParsedCsvData => {
     const amount = parseAmount(row[2]);
     const dateStr = row[0]?.trim() || "";
     const date = new Date(dateStr.split(".").reverse().join("-"));
-    const month = date.toLocaleString("en-US", { month: "long" });
-    
+    if (isNaN(date.getTime())) continue;
+
+    let monthDate = new Date(date); // Clone to avoid mutation
+    const year = monthDate.getFullYear();
+    const monthIndex = monthDate.getMonth();
+
+    // Shift income on the last working day of the month to the next month
+    if (amount >= 0 && isLastWorkingDayOfMonth(date)) {
+      monthDate.setMonth(monthDate.getMonth() + 1);
+    }
+
+    const month = monthDate.toLocaleString("en-US", { month: "long" });
     const hovedkategori = row[7]?.trim() || "Unknown";
     const kategori = row[8]?.trim() || "Unknown";
-    
+
     transactions.push({
-        date: dateStr,
-        title,
-        amount,
-        category: amount >= 0 ? kategori : hovedkategori,
-        month,
-      });
-      
-         
-      // Use subcategory for income, hovedkategori for expenses
-      if (amount >= 0) {
-        let existing = income.find((i) => i.category === kategori);
-        if (!existing) {
-          existing = { category: kategori };
-          income.push(existing);
-        }
-        existing[month] = Number(existing[month] || 0) + amount;
-      } else {
-        let existing = expenses.find((i) => i.category === hovedkategori);
-        if (!existing) {
-          existing = { category: hovedkategori };
-          expenses.push(existing);
-        }
-        existing[month] = Number(existing[month] || 0) + amount;
+      date: dateStr,
+      title,
+      amount,
+      category: amount >= 0 ? kategori : hovedkategori,
+      month,
+    });
+
+    if (amount >= 0) {
+      let existing = income.find((i) => i.category === kategori);
+      if (!existing) {
+        existing = { category: kategori };
+        income.push(existing);
       }
-      
+      existing[month] = Number(existing[month] || 0) + amount;
+    } else {
+      let existing = expenses.find((i) => i.category === hovedkategori);
+      if (!existing) {
+        existing = { category: hovedkategori };
+        expenses.push(existing);
+      }
+      existing[month] = Number(existing[month] || 0) + amount;
+    }
   }
 
-    addTotals(income);
-    addTotals(expenses);
+  addTotals(income);
+  addTotals(expenses);
 
-    const disposable: BudgetEntry = { category: "Disposable Income" };
-    months.forEach((month) => {
+  const disposable: BudgetEntry = { category: "Disposable Income" };
+  months.forEach((month) => {
     const totalIncome = income.reduce((sum, row) => sum + Number(row[month] || 0), 0);
     const totalExpenses = expenses.reduce((sum, row) => sum + Number(row[month] || 0), 0);
     disposable[month] = totalIncome + totalExpenses;
-    });
-    addTotals([disposable]);
+  });
+  addTotals([disposable]);
 
-    const totalIncome: BudgetEntry = { category: "Total Income" };
-    months.forEach((month) => {
+  const totalIncome: BudgetEntry = { category: "Total Income" };
+  months.forEach((month) => {
     totalIncome[month] = income.reduce((sum, row) => sum + Number(row[month] || 0), 0);
-    });
-    addTotals([totalIncome]);
-    income.push(totalIncome);
+  });
+  addTotals([totalIncome]);
+  income.push(totalIncome);
 
-    const totalExpenses: BudgetEntry = { category: "Total Expenses" };
-    months.forEach((month) => {
+  const totalExpenses: BudgetEntry = { category: "Total Expenses" };
+  months.forEach((month) => {
     totalExpenses[month] = expenses.reduce((sum, row) => sum + Number(row[month] || 0), 0);
-    });
-    addTotals([totalExpenses]);
-    expenses.push(totalExpenses);
+  });
+  addTotals([totalExpenses]);
+  expenses.push(totalExpenses);
 
-    return {
+  return {
     income,
     expenses,
     disposableIncome: [disposable],
     transactions,
-    };
-
-}
+  };
+};
 
 const parseAmount = (raw: string): number => {
   if (!raw) return 0;
@@ -106,4 +112,21 @@ const addTotals = (entries: BudgetEntry[]) => {
     entry["Total"] = parseFloat(total.toFixed(2));
     entry["Average"] = parseFloat((total / 12).toFixed(2));
   });
+};
+
+const isLastWorkingDayOfMonth = (date: Date): boolean => {
+  const lastDay = getLastWorkingDay(date.getFullYear(), date.getMonth());
+  return (
+    date.getDate() === lastDay.getDate() &&
+    date.getMonth() === lastDay.getMonth() &&
+    date.getFullYear() === lastDay.getFullYear()
+  );
+};
+
+const getLastWorkingDay = (year: number, month: number): Date => {
+  let date = new Date(year, month + 1, 0); // Last day of the month
+  while (date.getDay() === 6 || date.getDay() === 0) {
+    date.setDate(date.getDate() - 1); // Move to previous day if Saturday/Sunday
+  }
+  return date;
 };
