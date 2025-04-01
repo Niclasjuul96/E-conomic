@@ -4,7 +4,7 @@ import React, { useEffect, useRef } from "react";
 import { TransactionDetail } from "@/types/types";
 
 interface Props {
-  selectedDetails: { category: string; month: string };
+  selectedDetails: { category: string; month: string; source: "income" | "expense" | "disposable" };
   transactions: TransactionDetail[];
   onClose: () => void;
 }
@@ -14,11 +14,14 @@ const TransactionDetails: React.FC<Props> = ({
   transactions,
   onClose,
 }) => {
-  const { category, month } = selectedDetails;
+  const { category, month, source } = selectedDetails;
   const ref = useRef<HTMLDivElement>(null);
   const clickedInsideTable = useRef(false);
 
   const filtered = transactions.filter((t) => {
+    if (source === "income" && t.amount < 0) return false;
+    if (source === "expense" && t.amount >= 0) return false;
+  
     if (category === "Total Income") {
       if (month === "Total") return t.amount >= 0;
       return t.amount >= 0 && t.month === month;
@@ -26,13 +29,11 @@ const TransactionDetails: React.FC<Props> = ({
       if (month === "Total") return t.amount < 0;
       return t.amount < 0 && t.month === month;
     } else if (month === "Total") {
-      return t.category === category;
+      return t.mainCategory === category;
     } else {
-      return t.category === category && t.month === month;
+      return t.mainCategory === category && t.month === month;
     }
-  });
-  
-  
+  });  
 
   useEffect(() => {
     const handleMouseDown = (event: MouseEvent) => {
@@ -107,7 +108,7 @@ const TransactionDetails: React.FC<Props> = ({
                     })}
                   </td>
                   <td className="border border-gray-700 px-4 py-2">
-                    {t.category}
+                    {t.subCategory}
                   </td>
                 </tr>
               ))

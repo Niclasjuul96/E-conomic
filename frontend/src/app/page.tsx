@@ -18,7 +18,7 @@ export default function Home() {
   const [disposableIncomeData, setDisposableIncomeData] = useState<BudgetRow[]>([]);
   const [availableYears, setAvailableYears] = useState<number[]>([]);
   const [selectedYear, setSelectedYear] = useState<number | null>(null);
-  const [selectedDetails, setSelectedDetails] = useState<{ category: string; month: string } | null>(null);
+  const [selectedDetails, setSelectedDetails] = useState<{ category: string; month: string; source: "income" | "expense" | "disposable" } | null>(null);
 
   const handleCsvParsed = (parsedData: any) => {
     setAllTransactions(parsedData.transactions);
@@ -42,7 +42,7 @@ export default function Home() {
     
       transactions.forEach((t) => {
         if ((isIncome && t.amount >= 0) || (!isIncome && t.amount < 0)) {
-          const category = t.category;
+          const category = t.mainCategory;
           if (!map.has(category)) {
             map.set(category, { category });
           }
@@ -126,7 +126,7 @@ export default function Home() {
             incomeData={filteredIncomeData}
             expenseData={filteredExpenseData}
             disposableIncomeData={filteredDisposableIncome}
-            onCellClick={(category, month) => setSelectedDetails({ category, month })}
+            onCellClick={(category, month, source) => setSelectedDetails({ category, month, source })}
           />
 
 

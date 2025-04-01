@@ -7,7 +7,8 @@ export interface TransactionDetail {
     date: string;
     title: string;
     amount: number;
-    category: string;
+    mainCategory: string;
+    subCategory: string;
     month: string;
 }
 
@@ -28,7 +29,7 @@ export interface BudgetTableProps {
     incomeData: BudgetRow[];
     expenseData: BudgetRow[];
     disposableIncomeData: BudgetRow[];
-    onCellClick?: (category: string, month: string) => void;
+    onCellClick?: (category: string, month: string, source: "income" | "expense" | "disposable") => void;
   }  
   
   

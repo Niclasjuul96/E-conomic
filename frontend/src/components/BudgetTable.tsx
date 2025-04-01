@@ -31,7 +31,8 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
   const renderTable = (
     title: string,
     data: BudgetRow[],
-    tableIndex: number
+    tableIndex: number,
+    type: "income" | "expense" | "disposable"
   ) => {
     const headerRefs: (HTMLTableCellElement | null)[] = [];
     allHeaderRefs.current[tableIndex] = headerRefs;
@@ -85,12 +86,14 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                     </tr>
                   ) : null;
 
+                const category = row.category || "";
+
                 return (
                   <React.Fragment key={index}>
                     {spacer}
                     <tr className="hover:bg-gray-800 transition-colors duration-200">
                       <td className="border border-gray-700 px-4 py-2 font-medium text-white">
-                        {row.category}
+                        {category}
                       </td>
                       {monthColumns.map((month) => {
                         const value = row[month];
@@ -105,9 +108,9 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                             key={month}
                             onClick={() => {
                               if (isClickable) {
-                                onCellClick?.(row.category, month);
+                                onCellClick?.(category, month, type);
                               }
-                            }}                            
+                            }}
                             className={`border border-gray-700 px-4 py-2 text-sm ${
                               isClickable ? "cursor-pointer" : ""
                             } ${
@@ -116,9 +119,14 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                                 : isNumber
                                 ? "text-green-600"
                                 : "text-white"
-                            }`}                            
+                            }`}
                           >
-                            {isNumber ? value.toLocaleString("da-DK", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : value || "-"}
+                            {isNumber
+                              ? value.toLocaleString("da-DK", {
+                                  minimumFractionDigits: 2,
+                                  maximumFractionDigits: 2,
+                                })
+                              : value || "-"}
                           </td>
                         );
                       })}
@@ -145,11 +153,12 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
   return (
     <div className="mt-6 w-full max-w-full px-4">
       <h2 className="text-3xl font-semibold mb-6 text-white">Budget Overview</h2>
-      {renderTable("Income Transactions", incomeData, 0)}
-      {renderTable("Expense Transactions", expenseData, 1)}
-      {renderTable("Disposable Income", disposableIncomeData, 2)}
+      {renderTable("Income Transactions", incomeData, 0, "income")}
+      {renderTable("Expense Transactions", expenseData, 1, "expense")}
+      {renderTable("Disposable Income", disposableIncomeData, 2, "disposable")}
     </div>
   );
 };
 
 export default BudgetTable;
+ 

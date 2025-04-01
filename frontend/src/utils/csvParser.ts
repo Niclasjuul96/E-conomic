@@ -1,72 +1,68 @@
 import { BudgetEntry, ParsedCsvData, TransactionDetail } from "@/types/types";
+import { defaultCsvStructure } from "@/constants/csvStructure";
 
 const months = [
   "January", "February", "March", "April", "May", "June",
   "July", "August", "September", "October", "November", "December"
 ];
 
-export const parseCsvContent = (text: string): ParsedCsvData => {
+export const parseCsvContent = (text: string, structure = defaultCsvStructure): ParsedCsvData => {
   const rows = text.split("\n").map((row) => row.split(";"));
   if (rows.length < 2) return { income: [], expenses: [], disposableIncome: [], transactions: [], years: [] };
 
-  const headers = rows[0].map((h) => h.trim());
   const dataRows = rows.slice(1);
-
   const income: BudgetEntry[] = [];
   const expenses: BudgetEntry[] = [];
   const transactions: TransactionDetail[] = [];
-  const years = new Set<number>(); // ✅ collect distinct years
+  const years = new Set<number>();
 
   for (const row of dataRows) {
-    if (row.length < headers.length) continue;
+    if (row.length <= Math.max(
+      structure.date,
+      structure.amount,
+      structure.title,
+      structure.mainCategory,
+      structure.subCategory
+    )) continue;
 
-    const entry: Record<string, any> = {};
-    headers.forEach((header, index) => {
-      entry[header] = row[index]?.trim();
-    });
+    const rawDate = row[structure.date]?.trim() || "";
+    const rawAmount = row[structure.amount]?.trim() || "";
+    const title = row[structure.title]?.trim() || "No title";
+    const mainCategory = row[structure.mainCategory]?.trim() || "Unknown";
+    const subCategory = row[structure.subCategory]?.trim() || "Unknown";
 
-    const title = row[1]?.trim() || "No title";
-    const amount = parseAmount(row[2]);
-    const dateStr = row[0]?.trim() || "";
-    const date = new Date(dateStr.split(".").reverse().join("-"));
+    const amount = parseAmount(rawAmount);
+    const date = new Date(rawDate.split(".").reverse().join("-"));
     if (isNaN(date.getTime())) continue;
 
-    let monthDate = new Date(date); // Clone to avoid mutation
+    let monthDate = new Date(date);
     const year = monthDate.getFullYear();
-    years.add(year); // ✅ add to year set
+    years.add(year);
 
-    // Shift income on the last working day of the month to the next month
     if (amount >= 0 && isLastWorkingDayOfMonth(date)) {
-      monthDate.setMonth(monthDate.getMonth() + 1);
+      monthDate = new Date(monthDate.getFullYear(), monthDate.getMonth() + 1, 1);
     }
 
     const month = monthDate.toLocaleString("en-US", { month: "long" });
-    const hovedkategori = row[7]?.trim() || "Unknown";
-    const kategori = row[8]?.trim() || "Unknown";
 
     transactions.push({
-      date: dateStr,
+      date: rawDate,
       title,
       amount,
-      category: amount >= 0 ? kategori : hovedkategori,
+      mainCategory,
+      subCategory,
       month,
     });
 
-    if (amount >= 0) {
-      let existing = income.find((i) => i.category === kategori);
-      if (!existing) {
-        existing = { category: kategori };
-        income.push(existing);
-      }
-      existing[month] = Number(existing[month] || 0) + amount;
-    } else {
-      let existing = expenses.find((i) => i.category === hovedkategori);
-      if (!existing) {
-        existing = { category: hovedkategori };
-        expenses.push(existing);
-      }
-      existing[month] = Number(existing[month] || 0) + amount;
+    const targetArray = amount >= 0 ? income : expenses;
+    const categoryKey = mainCategory;
+
+    let existing = targetArray.find((i) => i.category === categoryKey);
+    if (!existing) {
+      existing = { category: categoryKey };
+      targetArray.push(existing);
     }
+    existing[month] = Number(existing[month] || 0) + amount;
   }
 
   addTotals(income);
@@ -99,7 +95,7 @@ export const parseCsvContent = (text: string): ParsedCsvData => {
     expenses,
     disposableIncome: [disposable],
     transactions,
-    years: Array.from(years).sort(), // ✅ return sorted years
+    years: Array.from(years).sort(),
   };
 };
 
@@ -126,9 +122,9 @@ const isLastWorkingDayOfMonth = (date: Date): boolean => {
 };
 
 const getLastWorkingDay = (year: number, month: number): Date => {
-  let date = new Date(year, month + 1, 0); // Last day of the month
+  let date = new Date(year, month + 1, 0);
   while (date.getDay() === 6 || date.getDay() === 0) {
-    date.setDate(date.getDate() - 1); // Move to previous day if Saturday/Sunday
+    date.setDate(date.getDate() - 1);
   }
   return date;
 };
