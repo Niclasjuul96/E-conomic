@@ -1,0 +1,33 @@
+.app-main {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 1.5rem;
+  color: white;
+}
+
+.app-title {
+  font-size: 1.875rem; // 3xl
+  font-weight: bold;
+  margin-bottom: 1rem;
+}
+
+.year-selector {
+  margin-top: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.year-label {
+  margin-right: 0.5rem;
+  font-weight: 600;
+}
+
+.year-dropdown {
+  background-color: #1f2937; // Tailwind bg-gray-800
+  color: white;
+  border: 1px solid #4b5563; // Tailwind border-gray-600
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+}

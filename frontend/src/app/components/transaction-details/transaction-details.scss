@@ -1,0 +1,59 @@
+.transaction-wrapper {
+  margin-top: 2.5rem;
+  width: 100%;
+  max-width: 64rem; // 4xl
+  border: 1px solid #374151; // border-gray-700
+  border-radius: 0.5rem;
+  background-color: black;
+  color: white;
+  padding: 1rem;
+}
+
+.transaction-heading {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.highlight {
+  color: white;
+}
+
+.table-scroll {
+  overflow-x: auto;
+}
+
+.transaction-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #374151;
+  font-size: 0.875rem; // text-sm
+}
+
+.table-header {
+  background-color: #111827; // bg-gray-900
+  color: white;
+}
+
+.table-row:hover {
+  background-color: #1f2937; // hover:bg-gray-800
+  transition: background-color 0.2s;
+}
+
+.table-cell {
+  border: 1px solid #374151;
+  padding: 0.5rem 1rem;
+}
+
+.positive {
+  color: #16a34a; // text-green-600
+}
+
+.negative {
+  color: #dc2626; // text-red-600
+}
+
+.no-data {
+  text-align: center;
+  color: #9ca3af; // text-gray-400
+}

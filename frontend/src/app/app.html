@@ -1,0 +1,34 @@
+<main class="app-main">
+  <h1 class="app-title">E-conomic</h1>
+
+  <!-- CSV Upload -->
+  <csv-upload (dataParsed)="handleCsvParsed($event)"></csv-upload>
+
+  <!-- Year Selector -->
+  <div *ngIf="availableYears.length > 0" class="year-selector">
+    <label class="year-label">Select Year:</label>
+    <select [(ngModel)]="selectedYear" class="year-dropdown">
+      <option *ngFor="let year of availableYears" [value]="year">
+        {{ year }}
+      </option>
+    </select>
+  </div>
+
+  <!-- Budget Tables -->
+  <ng-container *ngIf="selectedYear">
+    <budget-table
+      [incomeData]="incomeData"
+      [expenseData]="expenseData"
+      [disposableIncomeData]="disposableIncomeData"
+      (cellClick)="onCellClick($event)"
+    ></budget-table>
+
+    <!-- Transaction Details -->
+    <transaction-details
+      *ngIf="selectedDetails"
+      [selectedDetails]="selectedDetails"
+      [transactions]="filteredTransactions"
+      (close)="onCloseDetails()"
+    ></transaction-details>
+  </ng-container>
+</main>
