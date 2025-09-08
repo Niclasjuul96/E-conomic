@@ -51,7 +51,13 @@ export class CsvParserService {
         monthDate = new Date(monthDate.getFullYear(), monthDate.getMonth() + 1, 1);
       }
 
-      const month = monthDate.toLocaleString("en-US", { month: "long" });
+      const month = months[monthDate.getMonth()];
+      console.log('Parsed:', {
+        type: amount >= 0 ? 'income' : 'expense',
+        category: mainCategory,
+        month,
+        amount,
+      });
 
       transactions.push({
         date: rawDate,
@@ -67,8 +73,10 @@ export class CsvParserService {
 
       let existing = targetArray.find((i) => i.category === categoryKey);
       if (!existing) {
-        existing = { category: categoryKey };
-        targetArray.push(existing);
+        const newEntry: BudgetEntry = { category: categoryKey };
+        months.forEach((m) => (newEntry[m] = 0));
+        targetArray.push(newEntry);
+        existing = newEntry;
       }
       existing[month] = Number(existing[month] || 0) + amount;
     }
@@ -97,6 +105,7 @@ export class CsvParserService {
     });
     this.addTotals([totalExpenses]);
     expenses.push(totalExpenses);
+
 
     return {
       income,
