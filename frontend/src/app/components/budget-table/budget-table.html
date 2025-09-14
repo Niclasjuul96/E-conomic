@@ -26,12 +26,13 @@
                 zero: typeof val === 'number' && val === 0,
                 clickable: isClickable(row, month)
               }"
+              (click)="isClickable(row, month) && emitCellClick(row.category!, month, 'income')"
             >
               {{ typeof val === 'number' ? (val | number:'1.2-2':'da-DK') : '0' }}
             </td>
             </ng-container>
             <ng-container *ngIf="!row[month]">
-              <td class="value-cell">0</td>
+              <td class="value-cell zero">0</td>
             </ng-container>
           </ng-container>
         </tr>
@@ -64,14 +65,13 @@
                 zero: typeof val === 'number' && val === 0,
                 clickable: isClickable(row, month)
               }"
+              (click)="isClickable(row, month) && emitCellClick(row.category!, month, 'expense')"
             >
               {{ typeof val === 'number' ? (val | number:'1.2-2':'da-DK') : '0' }}
             </td>
-
-
             </ng-container>
             <ng-container *ngIf="!row[month]">
-              <td class="value-cell">0</td>
+              <td class="value-cell zero">0</td>
             </ng-container>
           </ng-container>
         </tr>
@@ -104,12 +104,14 @@
                 zero: typeof val === 'number' && val === 0,
                 clickable: isClickable(row, month)
               }"
+              (click)="isClickable(row, month) && emitCellClick(row.category!, month, 'disposable')"
             >
               {{ typeof val === 'number' ? (val | number:'1.2-2':'da-DK') : '0' }}
             </td>
+
             </ng-container>
             <ng-container *ngIf="!row[month]">
-              <td class="value-cell">0</td>
+              <td class="value-cell zero">0</td>
             </ng-container>
           </ng-container>
         </tr>

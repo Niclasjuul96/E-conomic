@@ -41,23 +41,28 @@
     font-weight: 500;
   }
 
-  td.value-cell {
-    &.positive {
-      color: #16a34a; // green-600
-    }
+td.value-cell {
+  &.positive {
+    color: #16a34a; // green-600
+  }
 
-    &.negative {
-      color: #dc2626; // red-600
-    }
+  &.negative {
+    color: #dc2626; // red-600
+  }
 
-    &.zero {
-      color: inherit; // fallback until overridden below
-    }
+  &.zero {
+    color: inherit; // fallback until overridden below
+  }
 
-    &.clickable {
-      cursor: pointer;
+  &.clickable {
+    cursor: pointer;
+
+    &:hover {
+      background-color: #1f2937; // gray-800
     }
   }
+}
+
 }
 
 // Income table → zeros should be green
