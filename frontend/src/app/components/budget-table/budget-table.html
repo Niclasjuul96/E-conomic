@@ -4,7 +4,7 @@
   <!-- Income Table -->
   <ng-container *ngIf="incomeData.length > 0">
     <h2 class="table-title">Income Transactions</h2>
-    <table class="budget-table">
+    <table class="budget-table income-table">
       <thead>
         <tr>
           <th class="table-header">Category</th>
@@ -17,21 +17,21 @@
         <tr *ngFor="let row of incomeData" class="table-row">
           <td class="category-cell">{{ row.category }}</td>
           <ng-container *ngFor="let month of monthColumns">
-            <ng-container *ngIf="row[month] !== undefined; let val">
-              <td
-                class="value-cell"
-                [ngClass]="{
-                  positive: typeof val === 'number' && val >= 0,
-                  negative: typeof val === 'number' && val < 0,
-                  clickable: isClickable(row, month)
-                }"
-                (click)="isClickable(row, month) && emitCellClick(row.category!, month, 'income')"
-              >
-                {{ typeof val === 'number' ? (val | number:'1.2-2':'da-DK') : '-' }}
-              </td>
+            <ng-container *ngIf="row[month] as val">
+            <td
+              class="value-cell"
+              [ngClass]="{
+                positive: typeof val === 'number' && val > 0,
+                negative: typeof val === 'number' && val < 0,
+                zero: typeof val === 'number' && val === 0,
+                clickable: isClickable(row, month)
+              }"
+            >
+              {{ typeof val === 'number' ? (val | number:'1.2-2':'da-DK') : '0' }}
+            </td>
             </ng-container>
-            <ng-container *ngIf="typeof row[month] !== 'number'">
-              <td class="value-cell">-</td>
+            <ng-container *ngIf="!row[month]">
+              <td class="value-cell">0</td>
             </ng-container>
           </ng-container>
         </tr>
@@ -42,7 +42,7 @@
   <!-- Expense Table -->
   <ng-container *ngIf="expenseData.length > 0">
     <h2 class="table-title">Expense Transactions</h2>
-    <table class="budget-table">
+    <table class="budget-table expense-table">
       <thead>
         <tr>
           <th class="table-header">Category</th>
@@ -55,21 +55,23 @@
         <tr *ngFor="let row of expenseData" class="table-row">
           <td class="category-cell">{{ row.category }}</td>
           <ng-container *ngFor="let month of monthColumns">
-            <ng-container *ngIf="row[month] !== undefined; let val">
-              <td
-                class="value-cell"
-                [ngClass]="{
-                  positive: typeof val === 'number' && val >= 0,
-                  negative: typeof val === 'number' && val < 0,
-                  clickable: isClickable(row, month)
-                }"
-                (click)="isClickable(row, month) && emitCellClick(row.category!, month, 'expense')"
-              >
-                {{ typeof val === 'number' ? (val | number:'1.2-2':'da-DK') : '-' }}
-              </td>
+            <ng-container *ngIf="row[month] as val">
+            <td
+              class="value-cell"
+              [ngClass]="{
+                positive: typeof val === 'number' && val > 0,
+                negative: typeof val === 'number' && val < 0,
+                zero: typeof val === 'number' && val === 0,
+                clickable: isClickable(row, month)
+              }"
+            >
+              {{ typeof val === 'number' ? (val | number:'1.2-2':'da-DK') : '0' }}
+            </td>
+
+
             </ng-container>
-            <ng-container *ngIf="typeof row[month] !== 'number'">
-              <td class="value-cell">-</td>
+            <ng-container *ngIf="!row[month]">
+              <td class="value-cell">0</td>
             </ng-container>
           </ng-container>
         </tr>
@@ -80,7 +82,7 @@
   <!-- Disposable Income Table -->
   <ng-container *ngIf="disposableIncomeData.length > 0">
     <h2 class="table-title">Disposable Income</h2>
-    <table class="budget-table">
+    <table class="budget-table disposable-table">
       <thead>
         <tr>
           <th class="table-header">Category</th>
@@ -94,22 +96,23 @@
           <td class="category-cell">{{ row.category }}</td>
           <ng-container *ngFor="let month of monthColumns">
             <ng-container *ngIf="row[month] as val">
-              <td
-                class="value-cell"
-                [ngClass]="{
-                  positive: typeof val === 'number' && val >= 0,
-                  negative: typeof val === 'number' && val < 0
-                }"
-              >
-                {{ typeof val === 'number' ? (val | number:'1.2-2':'da-DK') : '-' }}
-              </td>
+            <td
+              class="value-cell"
+              [ngClass]="{
+                positive: typeof val === 'number' && val > 0,
+                negative: typeof val === 'number' && val < 0,
+                zero: typeof val === 'number' && val === 0,
+                clickable: isClickable(row, month)
+              }"
+            >
+              {{ typeof val === 'number' ? (val | number:'1.2-2':'da-DK') : '0' }}
+            </td>
             </ng-container>
-            <ng-container *ngIf="row[month] === undefined">
-              <td class="value-cell">-</td>
+            <ng-container *ngIf="!row[month]">
+              <td class="value-cell">0</td>
             </ng-container>
           </ng-container>
         </tr>
-
       </tbody>
     </table>
   </ng-container>

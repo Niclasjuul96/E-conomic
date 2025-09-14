@@ -41,14 +41,6 @@
     font-weight: 500;
   }
 
-  tr.table-row {
-    transition: background-color 0.2s;
-
-    &:hover {
-      background-color: #1f2937; // gray-800
-    }
-  }
-
   td.value-cell {
     &.positive {
       color: #16a34a; // green-600
@@ -58,8 +50,28 @@
       color: #dc2626; // red-600
     }
 
+    &.zero {
+      color: inherit; // fallback until overridden below
+    }
+
     &.clickable {
       cursor: pointer;
     }
   }
 }
+
+// Income table → zeros should be green
+.income-table td.value-cell.zero {
+  color: #16a34a; // green
+}
+
+// Expense table → zeros should be red
+.expense-table td.value-cell.zero {
+  color: #dc2626; // red
+}
+
+// Disposable table → zeros neutral
+.disposable-table td.value-cell.zero {
+  color: #9ca3af; // gray
+}
+

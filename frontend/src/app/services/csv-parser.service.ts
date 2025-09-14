@@ -27,7 +27,6 @@ export class CsvParserService {
       )) continue;
 
       const rawDate = row[structure.date]?.trim() || "";
-      const rawAmount = row[structure.amount]?.trim() || "";
       const title = row[structure.title]?.trim() || "No title";
 
       const mainCategory = structure.mainCategory !== undefined
@@ -38,8 +37,9 @@ export class CsvParserService {
         ? row[structure.subCategory]?.trim() || "Unknown"
         : "Unknown";
 
+      // ✅ Always ensure number
+      const amount = this.parseAmount(row[structure.amount]);
 
-      const amount = this.parseAmount(rawAmount);
       const date = new Date(rawDate.split(".").reverse().join("-"));
       if (isNaN(date.getTime())) continue;
 
@@ -48,16 +48,14 @@ export class CsvParserService {
       years.add(year);
 
       if (amount >= 0 && this.isLastWorkingDayOfMonth(date)) {
-        monthDate = new Date(monthDate.getFullYear(), monthDate.getMonth() + 1, 1);
+        if (monthDate.getMonth() === 11) {
+          monthDate = new Date(monthDate.getFullYear() + 1, 0, 1); // Jan next year
+        } else {
+          monthDate = new Date(monthDate.getFullYear(), monthDate.getMonth() + 1, 1);
+        }
       }
 
       const month = months[monthDate.getMonth()];
-      console.log('Parsed:', {
-        type: amount >= 0 ? 'income' : 'expense',
-        category: mainCategory,
-        month,
-        amount,
-      });
 
       transactions.push({
         date: rawDate,
@@ -78,6 +76,7 @@ export class CsvParserService {
         targetArray.push(newEntry);
         existing = newEntry;
       }
+
       existing[month] = Number(existing[month] || 0) + amount;
     }
 
@@ -105,7 +104,6 @@ export class CsvParserService {
     });
     this.addTotals([totalExpenses]);
     expenses.push(totalExpenses);
-
 
     return {
       income,
