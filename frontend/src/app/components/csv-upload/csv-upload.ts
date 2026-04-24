@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Output } from '@angular/core';
 import { CsvParserService } from '../../services/csv-parser.service';
-import { ParsedCsvData } from '../../models/types';
+import { ParsedCsvData, TransactionDetail } from '../../models/types';
 import { defaultCsvStructure, CsvStructure } from '../../constants/csv-structure';
 import { CommonModule } from '@angular/common';
 
@@ -13,6 +13,7 @@ import { CommonModule } from '@angular/common';
 })
 export class CsvUpload {
   @Output() dataParsed = new EventEmitter<ParsedCsvData>();
+  @Output() transactionsToSync = new EventEmitter<TransactionDetail[]>(); // New output for syncing
 
   selectedFile: File | null = null;
   csvPreview: string[][] = [];
@@ -61,7 +62,13 @@ export class CsvUpload {
     reader.onload = () => {
       const text = reader.result as string;
       const parsed = this.csvParser.parseCsvContent(text, this.customStructure);
+      
+      // Emit the parsed data
       this.dataParsed.emit(parsed);
+      
+      // Also emit transactions for syncing to Google Sheets
+      this.transactionsToSync.emit(parsed.transactions);
+      
       this.showModal = false;
     };
     reader.readAsText(this.selectedFile);
@@ -80,5 +87,4 @@ export class CsvUpload {
     const value = Number(target.value);
     this.handleStructureChange(field as keyof CsvStructure, value);
   }
-
 }

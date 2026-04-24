@@ -5,29 +5,120 @@
   justify-content: center;
   min-height: 100vh;
   padding: 1.5rem;
-  color: white;
+  background-color: #FFF; // Black background
+  color: black;
+}
+
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 1.5rem;
 }
 
 .app-title {
   font-size: 1.875rem; // 3xl
   font-weight: bold;
-  margin-bottom: 1rem;
+  margin-bottom: 0;
+  color: black;
 }
 
-.year-selector {
-  margin-top: 1rem;
-  margin-bottom: 1.5rem;
+.auth-section {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+
+  .login-button {
+    background-color: #4285f4; // Google Blue
+    color: white;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.2s;
+
+    &:hover:not(:disabled) {
+      background-color: #357ae8;
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+
+  .user-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+
+    .user-picture {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #4285f4;
+    }
+
+    .user-name {
+      font-size: 0.875rem;
+      color: #4b5563; // Dark gray (visible on white background)
+    }
+
+    .logout-button {
+      background-color: #ef4444; // Tailwind red-500
+      color: white;
+      padding: 0.5rem 0.75rem;
+      border: none;
+      border-radius: 0.25rem;
+      cursor: pointer;
+      font-size: 0.875rem;
+      transition: background-color 0.2s;
+
+      &:hover {
+        background-color: #dc2626;
+      }
+    }
+  }
+}
+
+.sync-status {
+  padding: 0.5rem 1rem;
+  margin-bottom: 1rem;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+
+  &.sync-syncing {
+    background-color: #fbbf24; // Tailwind amber-400
+    color: #78350f;
+  }
+
+  &.sync-success {
+    background-color: #10b981; // Tailwind emerald-500
+    color: white;
+  }
+
+  &.sync-error {
+    background-color: #ef4444; // Tailwind red-500
+    color: white;
+  }
 }
 
 .year-label {
   margin-right: 0.5rem;
   font-weight: 600;
+  color: #1f2937;
 }
 
 .year-dropdown {
-  background-color: #1f2937; // Tailwind bg-gray-800
-  color: white;
-  border: 1px solid #4b5563; // Tailwind border-gray-600
-  padding: 0.25rem 0.5rem;
+  background-color: white;
+  color: #1f2937;
+  border: 2px solid #3b82f6; // Blue border
+  padding: 0.5rem;
   border-radius: 0.25rem;
+  cursor: pointer;
+  font-weight: 500;
 }

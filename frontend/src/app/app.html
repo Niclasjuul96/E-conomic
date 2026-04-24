@@ -1,8 +1,39 @@
 <main class="app-main">
-  <h1 class="app-title">E-conomic</h1>
+  <div class="app-header">
+    <h1 class="app-title">E-conomic</h1>
+    
+    <!-- Google Auth Section -->
+    <div class="auth-section">
+      <button 
+        *ngIf="!(isAuthenticated$ | async)" 
+        (click)="login()" 
+        class="login-button"
+        [disabled]="!(authService.isInitialized | async)">
+        Login with Google
+      </button>
+      <div *ngIf="isAuthenticated$ | async" class="user-info">
+        <img *ngIf="userPicture$ | async as picture" [src]="picture" alt="Profile" class="user-picture">
+        <span class="user-name">{{ userName$ | async }}</span>
+        <button (click)="logout()" class="logout-button">Logout</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sync Status -->
+  <div *ngIf="syncStatus$ | async as status" [ngClass]="'sync-' + status" class="sync-status">
+    <span *ngIf="status === 'syncing'">⟳ Syncing to Google Sheets...</span>
+    <span *ngIf="status === 'success'">✓ Synced to Google Sheets</span>
+    <span *ngIf="status === 'error'">✗ Sync failed - check console</span>
+  </div>
+
+  <!-- Sheet Selector -->
+  <sheet-selector></sheet-selector>
 
   <!-- CSV Upload -->
-  <csv-upload (dataParsed)="handleCsvParsed($event)"></csv-upload>
+  <csv-upload 
+    (dataParsed)="handleCsvParsed($event)"
+    (transactionsToSync)="syncTransactionsToSheet($event)">
+  </csv-upload>
 
   <!-- Year Selector -->
   <div *ngIf="availableYears.length > 0" class="year-selector">
