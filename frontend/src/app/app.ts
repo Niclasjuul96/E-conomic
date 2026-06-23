@@ -69,6 +69,111 @@ export class App implements OnInit {
   }
 
   /**
+   * Recalculate budget data when year is selected
+   */
+  onYearSelected(): void {
+    console.log('[App] onYearSelected() called');
+    console.log('[App] selectedYear value:', this.selectedYear, 'type:', typeof this.selectedYear);
+    console.log('[App] allTransactions length:', this.allTransactions.length);
+
+    if (!this.selectedYear) {
+      console.warn('[App] selectedYear is falsy:', this.selectedYear);
+      return;
+    }
+
+    if (this.allTransactions.length === 0) {
+      console.warn('[App] No transactions to recalculate');
+      return;
+    }
+
+    console.log('[App] Calling recalculateBudgetForYear with:', this.selectedYear);
+    this.recalculateBudgetForYear(this.selectedYear);
+  }
+
+  /**
+   * Recalculate budget tables for specific year
+   */
+  private recalculateBudgetForYear(year: number | string): void {
+    try {
+      const yearNum = typeof year === 'string' ? parseInt(year) : year;
+      console.log(`[App] recalculateBudgetForYear: converting year ${year} (${typeof year}) to number: ${yearNum}`);
+
+      const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+      const income: BudgetRow[] = [];
+      const expenses: BudgetRow[] = [];
+
+      // Filter and aggregate transactions for this year
+      const yearTransactions = this.allTransactions.filter((t) => {
+        const dateArray = t.date.split('.');
+        const txYear = parseInt(dateArray[2] || '0');
+        return txYear === yearNum;
+      });
+
+      console.log(`[App] Year ${yearNum}: found ${yearTransactions.length} transactions (from ${this.allTransactions.length} total)`);
+      if (yearTransactions.length > 0) {
+        console.log('[App] Sample transactions:', yearTransactions.slice(0, 3).map(t => ({
+          date: t.date,
+          month: t.month,
+          amount: t.amount,
+          category: t.mainCategory
+        })));
+      }
+
+      for (const transaction of yearTransactions) {
+        const amount = transaction.amount;
+        const category = transaction.mainCategory || 'Unknown';
+        const month = transaction.month || 'Unknown';
+
+        const targetArray = amount >= 0 ? income : expenses;
+        let existing = targetArray.find((i) => i.category === category);
+
+        if (!existing) {
+          const newEntry: BudgetRow = { category };
+          MONTH_NAMES.forEach((m) => (newEntry[m] = 0));
+          targetArray.push(newEntry);
+          existing = newEntry;
+        }
+
+        existing[month] = Number(existing[month] || 0) + Number(amount);
+      }
+
+      // Add totals
+      this.addTotalsAndAverages(income);
+      this.addTotalsAndAverages(expenses);
+
+      // Calculate disposable for this year
+      const disposable: BudgetRow = { category: 'Disposable Income' };
+      MONTH_NAMES.forEach((month) => {
+        const totalIncome = income.reduce((sum, row) => sum + Number(row[month] || 0), 0);
+        const totalExpenses = expenses.reduce((sum, row) => sum + Number(row[month] || 0), 0);
+        disposable[month] = totalIncome + totalExpenses;
+      });
+      this.addTotalsAndAverages([disposable]);
+
+      // Update budget data
+      this.incomeData = income;
+      this.expenseData = expenses;
+      this.disposableIncomeData = [disposable];
+
+      console.log(`[App] Budget updated for year ${yearNum}:`, {
+        incomeCategories: income.length,
+        expenseCategories: expenses.length,
+        hasDisposable: !!disposable
+      });
+
+      this.cdr.markForCheck();
+      console.log(`[App] Change detection triggered`);
+    } catch (error) {
+      console.error(`[App] ERROR in recalculateBudgetForYear:`, error);
+      // Reset to empty data on error
+      this.incomeData = [];
+      this.expenseData = [];
+      this.disposableIncomeData = [];
+      this.cdr.markForCheck();
+    }
+  }
+
+  /**
    * Load initial transactions from Google Sheets on app startup
    */
   private async loadInitialData(): Promise<void> {
@@ -110,6 +215,12 @@ export class App implements OnInit {
       // Force Angular to detect changes
       this.cdr.markForCheck();
       console.log('[App] Change detection triggered');
+
+      // Recalculate budget for selected year
+      if (this.selectedYear) {
+        console.log('[App] Recalculating budget for year:', this.selectedYear);
+        this.onYearSelected();
+      }
     } catch (error) {
       console.error('[App] Error loading initial data:', error);
     }
@@ -223,16 +334,20 @@ export class App implements OnInit {
   handleCsvParsed(parsed: ParsedCsvData) {
     // Merge loaded transactions with newly parsed ones
     this.allTransactions = this.mergeTransactions(this.allTransactions, parsed.transactions);
-    
+
     // Update aggregated data
     this.availableYears = parsed.years;
     this.selectedYear = parsed.years.at(-1) ?? null;
     this.incomeData = parsed.income;
     this.expenseData = parsed.expenses;
     this.disposableIncomeData = parsed.disposableIncome;
-    
+
     // Force change detection
     this.cdr.markForCheck();
+
+    // Recalculate budget for selected year (programmatic selection doesn't trigger (change) event)
+    console.log('[App] CSV parsed. Recalculating budget for selected year:', this.selectedYear);
+    this.onYearSelected();
   }
 
   /**
@@ -313,11 +428,11 @@ export class App implements OnInit {
   }
 
   get filteredTransactions(): TransactionDetail[] {
-    return this.selectedYear
-      ? this.allTransactions.filter(
-          (t) => new Date(t.date.split('.').reverse().join('-')).getFullYear() === this.selectedYear
-        )
-      : [];
+    if (!this.selectedYear) return [];
+    const yearNum = typeof this.selectedYear === 'string' ? parseInt(this.selectedYear) : this.selectedYear;
+    return this.allTransactions.filter(
+      (t) => new Date(t.date.split('.').reverse().join('-')).getFullYear() === yearNum
+    );
   }
 
   onCellClick(details: { category: string; month: string; source: 'income' | 'expense' | 'disposable' }) {

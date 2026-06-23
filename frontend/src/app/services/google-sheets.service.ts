@@ -416,19 +416,27 @@ export class GoogleSheetsService {
     // Create a sheet for each year
     for (const year of years) {
       await this.createYearSheet(spreadsheetId, year, token);
-      
-      // Filter data for this year
-      const yearIncome = this.filterBudgetByYear(incomeData, year);
-      const yearExpense = this.filterBudgetByYear(expenseData, year);
-      const yearDisposable = this.filterBudgetByYear(disposableData, year);
 
-      // Write budget data to the year sheet
+      // Recalculate budget data ONLY for this year from raw transactions
+      const { income: yearIncome, expense: yearExpense } = this.aggregateTransactionsForYear(transactions, year);
+
+      // Calculate disposable income for this year
+      const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+      const yearDisposable: BudgetRow = { category: 'Disposable Income' };
+      MONTH_NAMES.forEach((month) => {
+        const totalIncome = yearIncome.reduce((sum, row) => sum + Number(row[month] || 0), 0);
+        const totalExpenses = yearExpense.reduce((sum, row) => sum + Number(row[month] || 0), 0);
+        yearDisposable[month] = totalIncome + totalExpenses;
+      });
+      this.addTotalsToYearData([yearDisposable]);
+
+      // Write budget data to the year sheet (year-filtered data)
       await this.writeYearBudgetTable(
         spreadsheetId,
         `${year}`,
         yearIncome,
         yearExpense,
-        yearDisposable,
+        [yearDisposable],
         token
       );
     }
@@ -857,13 +865,63 @@ export class GoogleSheetsService {
   }
 
   /**
-   * Filter budget data by year (keep only rows with data for the specified year)
-   * Note: This is for budget row aggregation - typically all rows have all months
-   * For true year filtering, you'd need the raw transactions
+   * Recalculate budget data for a specific year from raw transactions
    */
   private filterBudgetByYear(budgetData: BudgetRow[], year: number): BudgetRow[] {
-    // Since budget data is already aggregated by month for all years,
-    // we just return it as-is (in a real scenario, you'd filter based on transaction dates)
+    // Since budget data is pre-aggregated across all years,
+    // we need to recalculate from transactions to isolate this year's data
+    // This will be called from addYearSheets which has access to transactions
+    // For now, return data as-is (will be overridden by aggregateTransactionsForYear)
     return budgetData;
+  }
+
+  /**
+   * Recalculate budget data for specific year from transactions
+   */
+  private aggregateTransactionsForYear(
+    transactions: TransactionDetail[],
+    year: number
+  ): { income: BudgetRow[]; expense: BudgetRow[] } {
+    const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    const income: BudgetRow[] = [];
+    const expenses: BudgetRow[] = [];
+
+    // Filter transactions for this year and aggregate
+    for (const transaction of transactions) {
+      const dateArray = transaction.date.split('.');
+      const txYear = parseInt(dateArray[2] || '0');
+      if (txYear !== year) continue;
+
+      const amount = transaction.amount;
+      const category = transaction.mainCategory || 'Unknown';
+      const month = transaction.month || 'Unknown';
+
+      const targetArray = amount >= 0 ? income : expenses;
+      let existing = targetArray.find((i) => i.category === category);
+
+      if (!existing) {
+        const newEntry: BudgetRow = { category };
+        MONTH_NAMES.forEach((m) => (newEntry[m] = 0));
+        targetArray.push(newEntry);
+        existing = newEntry;
+      }
+
+      existing[month] = Number(existing[month] || 0) + Number(amount);
+    }
+
+    // Add totals
+    this.addTotalsToYearData(income);
+    this.addTotalsToYearData(expenses);
+
+    return { income, expense: expenses };
+  }
+
+  private addTotalsToYearData(entries: BudgetRow[]): void {
+    const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    entries.forEach((entry) => {
+      const total = MONTH_NAMES.reduce((sum, m) => sum + Number(entry[m] || 0), 0);
+      entry['Total'] = parseFloat(total.toFixed(2));
+      entry['Average'] = parseFloat((total / 12).toFixed(2));
+    });
   }
 }

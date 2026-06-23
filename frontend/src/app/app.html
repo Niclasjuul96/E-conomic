@@ -38,7 +38,7 @@
   <!-- Year Selector -->
   <div *ngIf="availableYears.length > 0" class="year-selector">
     <label class="year-label">Select Year:</label>
-    <select [(ngModel)]="selectedYear" class="year-dropdown">
+    <select [(ngModel)]="selectedYear" (change)="onYearSelected()" class="year-dropdown">
       <option *ngFor="let year of availableYears" [value]="year">
         {{ year }}
       </option>

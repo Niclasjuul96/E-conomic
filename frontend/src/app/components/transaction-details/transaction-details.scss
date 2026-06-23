@@ -2,21 +2,20 @@
   margin-top: 2.5rem;
   width: 100%;
   max-width: 64rem; // 4xl
-  border: 1px solid #374151; // border-gray-700
-  border-radius: 0.5rem;
-  background-color: black;
-  color: white;
   padding: 1rem;
+  color: #1f2937;
 }
 
 .transaction-heading {
   font-size: 1.125rem;
   font-weight: 600;
   margin-bottom: 1rem;
+  color: #1f2937;
 }
 
 .highlight {
-  color: white;
+  color: #111827;
+  font-weight: 700;
 }
 
 .table-scroll {
@@ -26,12 +25,13 @@
 .transaction-table {
   width: 100%;
   border-collapse: collapse;
-  border: 1px solid #374151;
+  background-color: black;
+  color: white;
   font-size: 0.875rem; // text-sm
 }
 
 .table-header {
-  background-color: #111827; // bg-gray-900
+  background-color: #1f2937; // bg-gray-900
   color: white;
 }
 

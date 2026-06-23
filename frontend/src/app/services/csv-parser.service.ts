@@ -47,14 +47,7 @@ export class CsvParserService {
       const year = monthDate.getFullYear();
       years.add(year);
 
-      if (amount >= 0 && this.isLastWorkingDayOfMonth(date)) {
-        if (monthDate.getMonth() === 11) {
-          monthDate = new Date(monthDate.getFullYear() + 1, 0, 1); // Jan next year
-        } else {
-          monthDate = new Date(monthDate.getFullYear(), monthDate.getMonth() + 1, 1);
-        }
-      }
-
+      // Don't shift income to next month - use actual transaction month
       const month = months[monthDate.getMonth()];
 
       transactions.push({
@@ -125,22 +118,5 @@ export class CsvParserService {
       entry["Total"] = parseFloat(total.toFixed(2));
       entry["Average"] = parseFloat((total / 12).toFixed(2));
     });
-  }
-
-  private isLastWorkingDayOfMonth(date: Date): boolean {
-    const lastDay = this.getLastWorkingDay(date.getFullYear(), date.getMonth());
-    return (
-      date.getDate() === lastDay.getDate() &&
-      date.getMonth() === lastDay.getMonth() &&
-      date.getFullYear() === lastDay.getFullYear()
-    );
-  }
-
-  private getLastWorkingDay(year: number, month: number): Date {
-    let date = new Date(year, month + 1, 0);
-    while (date.getDay() === 6 || date.getDay() === 0) {
-      date.setDate(date.getDate() - 1);
-    }
-    return date;
   }
 }
