@@ -308,7 +308,7 @@ export class App implements OnInit {
     this.incomeData = income;
     this.expenseData = expenses;
     this.disposableIncomeData = [disposable];
-    this.availableYears = Array.from(years).sort();
+    this.availableYears = Array.from(years).sort().reverse();
     this.selectedYear = this.availableYears.at(-1) ?? null;
     
     // Force change detection after aggregation

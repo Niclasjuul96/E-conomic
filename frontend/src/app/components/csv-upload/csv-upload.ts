@@ -19,6 +19,7 @@ export class CsvUpload {
   csvPreview: string[][] = [];
   showModal = false;
   showEditStructure = false;
+  isDragging = false;
 
   customStructure: CsvStructure = { ...defaultCsvStructure };
   columnFields = ['date', 'title', 'amount', 'mainCategory', 'subCategory'];
@@ -29,7 +30,32 @@ export class CsvUpload {
     const input = event.target as HTMLInputElement;
     if (!input.files || input.files.length === 0) return;
 
-    this.selectedFile = input.files[0];
+    this.prepareFile(input.files[0]);
+    input.value = '';
+  }
+
+  onDragOver(event: DragEvent): void {
+    event.preventDefault();
+    this.isDragging = true;
+  }
+
+  onDragLeave(event: DragEvent): void {
+    event.preventDefault();
+    this.isDragging = false;
+  }
+
+  onDrop(event: DragEvent): void {
+    event.preventDefault();
+    this.isDragging = false;
+
+    const file = event.dataTransfer?.files?.[0];
+    if (!file) return;
+
+    this.prepareFile(file);
+  }
+
+  private prepareFile(file: File): void {
+    this.selectedFile = file;
 
     const reader = new FileReader();
     reader.onload = () => {

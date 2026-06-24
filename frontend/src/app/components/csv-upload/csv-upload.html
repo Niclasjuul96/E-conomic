@@ -1,20 +1,40 @@
-<div class="upload-container">
-  <input
-    type="file"
-    accept=".csv"
-    (change)="onFileSelected($event)"
-    class="hidden"
-    id="csvUpload"
-  />
-  <label for="csvUpload" class="upload-label">
-    Upload CSV
-  </label>
+<section class="upload-container">
+  <div class="section-heading">
+    <span class="section-icon" aria-hidden="true">&#8679;</span>
+    <div>
+      <h2>CSV Uploader</h2>
+      <p>Upload your bank statement CSV file</p>
+    </div>
+  </div>
+
+  <div
+    class="drop-zone"
+    [class.dragging]="isDragging"
+    (dragover)="onDragOver($event)"
+    (dragleave)="onDragLeave($event)"
+    (drop)="onDrop($event)"
+  >
+    <input
+      type="file"
+      accept=".csv"
+      (change)="onFileSelected($event)"
+      class="hidden"
+      id="csvUpload"
+    />
+
+    <div class="drop-icon" aria-hidden="true">&#8682;</div>
+    <p class="drop-title">Drag and drop your CSV file here</p>
+    <p class="drop-or">or</p>
+    <label for="csvUpload" class="upload-label">
+      Choose File
+    </label>
+    <p class="drop-hint">Supports CSV files exported from bank statements</p>
+  </div>
 
   <p *ngIf="selectedFile" class="file-name">
-    File: {{ selectedFile.name }}
+    Selected: {{ selectedFile.name }}
   </p>
 
-  <!-- Modal -->
   <div *ngIf="showModal" class="modal-backdrop">
     <div class="modal-box">
       <h2 class="modal-title">CSV Preview</h2>
@@ -68,4 +88,4 @@
       </div>
     </div>
   </div>
-</div>
+</section>

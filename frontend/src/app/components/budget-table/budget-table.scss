@@ -1,7 +1,10 @@
 .budget-wrapper {
   margin-top: 1.5rem;
   width: 100%;
-  padding: 0 1rem;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-x: auto;
+  padding: 0 1.875rem 1.875rem;
   color: #1f2937;
 }
 
@@ -77,6 +80,12 @@
         background-color: #1f2937; // gray-800
       }
     }
+  }
+}
+
+@media (max-width: 900px) {
+  .budget-wrapper {
+    padding: 0 1rem 1rem;
   }
 }
 
